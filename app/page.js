@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { HeroHighlight } from "@/components/ui/hero-highlight";
 import { SendHorizonalIcon } from "lucide-react";
 import lottie from "lottie-web";
+
 export default function Home() {
   const [messages, setMessages] = useState([
     {
@@ -71,25 +71,24 @@ export default function Home() {
       path: "animation.json",
     });
   }, []);
-  return (
-    <div className="p-10 flex h-screen w-full bg-black">
-      <div className="flex flex-col ml-20 justify-center items-center">
-        <h1 className="text-white font-extrabold text-2xl">
-          Welcome to <span className="text-red-400">FemiCa.ai</span>{" "}
 
+  return (
+    <div className="p-5 sm:p-10 flex h-screen w-full bg-black flex-col lg:flex-row">
+      <div className="flex flex-col justify-center items-center lg:ml-20 w-full lg:w-1/2">
+        <h1 className="text-white font-extrabold text-xl sm:text-2xl">
+          Welcome to <span className="text-red-400">FemiCa.ai</span>
         </h1>
-        <p className="text-white mt-4">Empowering Women, One Care at a Time</p>
+        <p className="text-white mt-4 text-center">Empowering Women, One Care at a Time</p>
         <iframe
-          className="mt-8 "
+          className="mt-8 w-full max-w-sm sm:max-w-md"
           height={400}
-          width={400}
           src="https://lottie.host/embed/2e0440be-e82f-425f-9654-e4b5feab9744/ixZ6tZNzYq.json"
         ></iframe>
       </div>
 
-      <div className="flex flex-col items-center justify-center h-full w-full">
-        <div className=" flex flex-col w-[500px] h-[700px] border border-gray-700 rounded-lg p-4 space-y-4 bg-gray-800 shadow-md">
-          <div className=" flex flex-col space-y-2 flex-grow overflow-auto max-h-full">
+      <div className="flex flex-col items-center justify-center h-full w-full lg:w-1/2 mt-10 lg:mt-0">
+        <div className="flex flex-col w-full max-w-md h-[500px] sm:h-[600px] md:h-[700px] border border-gray-700 rounded-lg p-4 space-y-4 bg-gray-800 shadow-md">
+          <div className="flex flex-col space-y-2 flex-grow overflow-auto max-h-full">
             {messages.map((message, index) => (
               <div
                 key={index}
