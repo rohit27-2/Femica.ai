@@ -54,7 +54,7 @@ function Home() {
             <ul className="list-disc list-inside text-xl space-y-4">
               <li>24/7 emotional support and guidance</li>
               <li>Personalized wellness recommendations</li>
-              <li>Access to women's health resources</li>
+              <li>Access to women&apos;s health resources</li>
               <li>Confidential and judgment-free conversations</li>
             </ul>
           </section>
