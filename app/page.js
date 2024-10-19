@@ -1,129 +1,84 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { SendHorizonalIcon } from "lucide-react";
-import lottie from "lottie-web";
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { BackgroundGradientAnimation } from '@/components/ui/gradient-bg';
+import { IconMouse } from '@tabler/icons-react';
 
-export default function Home() {
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: `Hi, I'm FemiCa, your wellbeing assistant. How can I help you today?`,
-    },
-  ]);
-
-  const [message, setMessage] = useState("");
-
-  const sendMessage = async () => {
-    setMessage("");
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { role: "user", content: message },
-      { role: "assistant", content: "" }, // Temporary placeholder for assistant response
-    ]);
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify([...messages, { role: "user", content: message }]),
-      });
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let result = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        result += decoder.decode(value);
-      }
-
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages];
-        updatedMessages[updatedMessages.length - 1].content = result;
-        return updatedMessages;
-      });
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
-
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+function Home() {
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const animationContainer = useRef(null);
-
-  useEffect(() => {
-    lottie.loadAnimation({
-      container: animationContainer.current,
-      renderer: "svg",
-      loop: true,
-      autoplay: true,
-      path: "animation.json",
-    });
+    // Check authentication status here
+    // For now, we'll just set it to false
+    setIsSignedIn(false);
   }, []);
 
-  return (
-    <div className="p-5 sm:p-10 flex h-screen w-full bg-black flex-col lg:flex-row">
-      <div className="flex flex-col justify-center items-center lg:ml-20 w-full lg:w-1/2">
-        <h1 className="text-white font-extrabold text-xl sm:text-2xl">
-          Welcome to <span className="text-red-400">FemiCa.ai</span>
-        </h1>
-        <p className="text-white mt-4 text-center">Empowering Women, One Care at a Time</p>
-        <iframe
-          className="mt-8 w-full max-w-sm sm:max-w-md"
-          height={400}
-          src="https://lottie.host/embed/2e0440be-e82f-425f-9654-e4b5feab9744/ixZ6tZNzYq.json"
-        ></iframe>
-      </div>
+  const scrollDown = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+  };
 
-      <div className="flex flex-col items-center justify-center h-full w-full lg:w-1/2 mt-10 lg:mt-0">
-        <div className="flex flex-col w-full max-w-md h-[500px] sm:h-[600px] md:h-[700px] border border-gray-700 rounded-lg p-4 space-y-4 bg-gray-800 shadow-md">
-          <div className="flex flex-col space-y-2 flex-grow overflow-auto max-h-full">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex p-2 ${
-                  message.role === "assistant" ? "justify-start mr-3" : "justify-end ml-3"
-                }`}
-              >
-                <div
-                  className={`${
-                    message.role === "assistant" ? "bg-red-400" : "bg-blue-500"
-                  } text-white rounded-lg p-3`}
-                >
-                  {message.content}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              placeholder="Message"
-              className="w-full p-2 border border-gray-600 rounded text-white bg-gray-900"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <button
-              className="bg-blue-500 text-white rounded px-5 py-2"
-              onClick={sendMessage}
-            >
-              <SendHorizonalIcon />
-            </button>
-          </div>
+  return (
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <BackgroundGradientAnimation>
+        <div className="absolute z-50 inset-0 flex items-center justify-center text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
+          <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b from-white/80 to-white/20">
+            FemiCa.ai
+          </p>
         </div>
+        <button 
+          onClick={scrollDown}
+          className="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-white text-black px-4 py-2 rounded-full flex items-center space-x-2 hover:bg-gray-200 transition-colors z-50"
+        >
+          <span>Scroll down</span>
+          <IconMouse size={20} />
+        </button>
+      </BackgroundGradientAnimation>
+
+      <div className="relative z-10">
+        <main className="container mx-auto px-4 py-16">
+          <section className="mb-12">
+            <h2 className="text-4xl font-semibold mb-6">Welcome to FemiCa.ai</h2>
+            <p className="mb-4 text-xl">
+              FemiCa.ai is your personal wellbeing assistant, designed to empower women through personalized care and support.
+            </p>
+            <p className="mb-4 text-xl">
+              Our AI-powered chatbot is here to listen, provide guidance, and offer resources tailored to your unique needs.
+            </p>
+          </section>
+
+          <section className="mb-12">
+            <h2 className="text-3xl font-semibold mb-6">Key Features</h2>
+            <ul className="list-disc list-inside text-xl space-y-4">
+              <li>24/7 emotional support and guidance</li>
+              <li>Personalized wellness recommendations</li>
+              <li>Access to women's health resources</li>
+              <li>Confidential and judgment-free conversations</li>
+            </ul>
+          </section>
+
+          <div className="flex justify-center space-x-4">
+            {isSignedIn ? (
+              <Link href="/chat" className="bg-blue-500 text-white px-8 py-4 rounded-lg font-semibold text-xl hover:bg-blue-600 transition-colors inline-block">
+                Start Chatting
+              </Link>
+            ) : (
+              <>
+                <Link href="/sign-in" className="bg-red-400 text-white px-8 py-4 rounded-lg font-semibold text-xl hover:bg-red-500 transition-colors inline-block">
+                  Sign In
+                </Link>
+                <Link href="/sign-up" className="bg-green-500 text-white px-8 py-4 rounded-lg font-semibold text-xl hover:bg-green-600 transition-colors inline-block">
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );
 }
+
+export default Home;
