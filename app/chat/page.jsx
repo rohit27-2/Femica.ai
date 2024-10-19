@@ -4,6 +4,8 @@ import { SendHorizonalIcon, Menu } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import Link from 'next/link';
 import lottie from "lottie-web";
+import { MenuItem, HoveredLink, ProductItem, Menu } from "@/components/ui/navbar-menu";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
     const [messages, setMessages] = useState([
