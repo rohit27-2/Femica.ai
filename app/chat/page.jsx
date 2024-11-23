@@ -168,12 +168,7 @@ export default function Home() {
             {/* Main content */}
             <main className="flex-1 flex flex-col md:flex-row pt-16">
                 {/* Left section with animation */}
-                <div className="w-full md:w-1/3 p-4 hidden md:flex flex-col justify-center items-center">
-                    <iframe
-                        className="w-full max-w-md aspect-square"
-                        src="https://lottie.host/embed/2e0440be-e82f-425f-9654-e4b5feab9744/ixZ6tZNzYq.json"
-                    />
-                </div>
+                
 
                 {/* Chat section */}
                 <div className="flex-1 p-4 flex flex-col h-[calc(100vh-4rem)]">
