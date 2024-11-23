@@ -1,31 +1,104 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { SendHorizonalIcon, Menu } from "lucide-react";
+import { SendHorizonalIcon, Menu, ImageIcon, X } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import Link from 'next/link';
 import lottie from "lottie-web";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export default function Home() {
     const [messages, setMessages] = useState([
         {
             role: "assistant",
-            content: `Hi, I'm FemiCa, your wellbeing assistant. How can I help you today?`,
+            content: `Hey, How can I help you today?`,
         },
     ]);
-
     const [message, setMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    
+    const fileInputRef = useRef(null);
+    const messagesEndRef = useRef(null);
+    const animationContainer = useRef(null);
+
+    useEffect(() => {
+        lottie.loadAnimation({
+            container: animationContainer.current,
+            renderer: "svg",
+            loop: true,
+            autoplay: true,
+            path: "animation.json",
+        });
+    }, []);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedImage(reader.result);
+                setImagePreview(URL.createObjectURL(file));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setSelectedImage(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && (message.trim() !== '' || selectedImage)) {
+            sendMessage();
+        }
+    };
 
     const sendMessage = async () => {
-        if (message.trim() === "") return;
+        if (message.trim() === "" && !selectedImage) return;
+
+        const messageToSend = [];
+        
+        if (selectedImage) {
+            messageToSend.push({
+                role: "user",
+                content: [
+                    { type: "text", text: message || "What do you think about this image?" },
+                    { type: "image_url", image_url: selectedImage }
+                ]
+            });
+        } else {
+            messageToSend.push({
+                role: "user",
+                content: message
+            });
+        }
 
         setMessage("");
         setIsLoading(true);
+        setSelectedImage(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+
         setMessages((prevMessages) => [
             ...prevMessages,
-            { role: "user", content: message },
+            { role: "user", content: message, image: imagePreview },
             { role: "assistant", content: "" },
         ]);
 
@@ -35,7 +108,7 @@ export default function Home() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify([...messages, { role: "user", content: message }]),
+                body: JSON.stringify([...messages, ...messageToSend]),
             });
 
             const reader = response.body.getReader();
@@ -60,92 +133,65 @@ export default function Home() {
         }
     };
 
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && message.trim() !== '') {
-            sendMessage();
-        }
-    };
-
-    const messagesEndRef = useRef(null);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const animationContainer = useRef(null);
-
-    useEffect(() => {
-        lottie.loadAnimation({
-            container: animationContainer.current,
-            renderer: "svg",
-            loop: true,
-            autoplay: true,
-            path: "animation.json",
-        });
-    }, []);
-
     return (
         <>
             <style jsx global>{`
-        /* Scrollbar styles */
-        ::-webkit-scrollbar {
-          width: 8px;
-        }
+                /* Scrollbar styles */
+                ::-webkit-scrollbar {
+                    width: 8px;
+                }
 
-        ::-webkit-scrollbar-track {
-          background: #1f2937;
-          border-radius: 4px;
-        }
+                ::-webkit-scrollbar-track {
+                    background: #1f2937;
+                    border-radius: 4px;
+                }
 
-        ::-webkit-scrollbar-thumb {
-          background: #4b5563;
-          border-radius: 4px;
-        }
+                ::-webkit-scrollbar-thumb {
+                    background: #4b5563;
+                    border-radius: 4px;
+                }
 
-        ::-webkit-scrollbar-thumb:hover {
-          background: #6b7280;
-        }
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #6b7280;
+                }
 
-        /* For Firefox */
-        * {
-          scrollbar-width: thin;
-          scrollbar-color: #4b5563 #1f2937;
-        }
+                /* For Firefox */
+                * {
+                    scrollbar-width: thin;
+                    scrollbar-color: #4b5563 #1f2937;
+                }
 
-        /* Typing animation */
-        @keyframes blink {
-          0% { opacity: .2; }
-          20% { opacity: 1; }
-          100% { opacity: .2; }
-        }
-        .typing span {
-          animation-name: blink;
-          animation-duration: 1.4s;
-          animation-iteration-count: infinite;
-          animation-fill-mode: both;
-        }
-        .typing span:nth-child(2) {
-          animation-delay: .2s;
-        }
-        .typing span:nth-child(3) {
-          animation-delay: .4s;
-        }
+                /* Typing animation */
+                @keyframes blink {
+                    0% { opacity: .2; }
+                    20% { opacity: 1; }
+                    100% { opacity: .2; }
+                }
+                .typing span {
+                    animation-name: blink;
+                    animation-duration: 1.4s;
+                    animation-iteration-count: infinite;
+                    animation-fill-mode: both;
+                }
+                .typing span:nth-child(2) {
+                    animation-delay: .2s;
+                }
+                .typing span:nth-child(3) {
+                    animation-delay: .4s;
+                }
 
-        /* Add styles for the navbar */
-        .navbar {
-          background-color: rgba(17, 24, 39, 0.8);
-          backdrop-filter: blur(10px);
-        }
+                /* Add styles for the navbar */
+                .navbar {
+                    background-color: rgba(17, 24, 39, 0.8);
+                    backdrop-filter: blur(10px);
+                }
 
-        html, body {
-          height: 100%;
-          overflow: hidden;
-        }
-      `}</style>
+                html, body {
+                    height: 100%;
+                    overflow: hidden;
+                }
+            `}</style>
+
             <div className="flex flex-col h-screen bg-black">
                 {/* Navbar */}
                 <nav className="navbar w-full z-10 px-4 py-2 flex justify-between items-center">
@@ -186,10 +232,6 @@ export default function Home() {
                 {/* Main content */}
                 <div className="flex flex-col xl:flex-row flex-grow overflow-hidden">
                     <div className="flex flex-col justify-center items-center xl:items-start w-full xl:w-1/3 p-4 xl:p-8">
-                        {/* <h1 className="text-white font-extrabold text-2xl sm:text-3xl md:text-4xl">
-                            Welcome to <span className="text-red-400">FemiCa.ai</span>
-                        </h1> */}
-                        {/* <p className="text-white mt-4 text-center xl:text-left text-lg">Empowering Women, One Care at a Time</p> */}
                         <div className="mt-8 w-full max-w-md aspect-square">
                             <iframe
                                 className="w-full h-full"
@@ -204,13 +246,24 @@ export default function Home() {
                                 {messages.map((message, index) => (
                                     <div
                                         key={index}
-                                        className={`flex p-2 ${message.role === "assistant" ? "justify-start" : "justify-end"
-                                            }`}
+                                        className={`flex p-2 ${message.role === "assistant" ? "justify-start" : "justify-end"}`}
                                     >
                                         <div
-                                            className={`${message.role === "assistant" ? "bg-red-400" : "bg-blue-500"
-                                                } text-white rounded-lg p-3 max-w-[80%] break-words`}
+                                            className={`${message.role === "assistant" ? "bg-red-400" : "bg-blue-500"} 
+                                                text-white rounded-lg p-3 max-w-[80%] break-words`}
                                         >
+                                            {message.image && (
+                                                <div className="mb-2">
+                                                    <Image
+                                                    height={200}
+                                                    width={200}
+                                                    alt="Uploaded content" 
+                                                        src={message.image} 
+                                                        
+                                                        className="max-w-full rounded-lg"
+                                                    />
+                                                </div>
+                                            )}
                                             {message.content}
                                             {message.role === "assistant" && message.content === "" && isLoading && (
                                                 <div className="typing">
@@ -222,6 +275,23 @@ export default function Home() {
                                 ))}
                                 <div ref={messagesEndRef} />
                             </div>
+
+                            {imagePreview && (
+                                <div className="relative inline-block">
+                                    <img 
+                                        src={imagePreview} 
+                                        alt="Preview" 
+                                        className="max-h-32 rounded-lg"
+                                    />
+                                    <button
+                                        onClick={removeImage}
+                                        className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1"
+                                    >
+                                        <X size={16} className="text-white" />
+                                    </button>
+                                </div>
+                            )}
+
                             <div className="flex space-x-2">
                                 <input
                                     type="text"
@@ -231,8 +301,21 @@ export default function Home() {
                                     onChange={(e) => setMessage(e.target.value)}
                                     onKeyPress={handleKeyPress}
                                 />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    className="hidden"
+                                    ref={fileInputRef}
+                                />
                                 <button
-                                    className="bg-blue-500 text-white rounded px-4 py-2 flex-shrink-0"
+                                    className="bg-gray-600 hover:bg-gray-700 text-white rounded px-4 py-2"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <ImageIcon size={20} />
+                                </button>
+                                <button
+                                    className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2"
                                     onClick={sendMessage}
                                 >
                                     <SendHorizonalIcon size={20} />
@@ -245,5 +328,3 @@ export default function Home() {
         </>
     );
 }
-
-
